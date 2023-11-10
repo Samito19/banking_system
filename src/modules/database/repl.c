@@ -6,16 +6,18 @@
 #include "input_buffer.h"
 #include "meta_commands.h"
 #include "statements.h"
+#include "table.h"
 
 int main(int argc, char* argv[]){
 	InputBuffer* input_buffer = new_input_buffer();
-	
+	Table* table = new_table();	
+
 	while (true){
 		printf("db > ");
 		read_input(input_buffer);
 
 		if (input_buffer->buffer[0] == '.'){
-			switch(exec_meta_command(input_buffer)){
+			switch(exec_meta_command(input_buffer, table)){
 				case (META_COMMAND_SUCCESS):
 					continue;
 				case (META_COMMAND_UNRECOGNIZED):
@@ -33,9 +35,14 @@ int main(int argc, char* argv[]){
 				continue;
 		}
 
-		exec_statement(&statement);
-		printf("Statement executed.\n");
-
+		switch (exec_statement(&statement, table)) {
+			case (EXECUTE_SUCCESS):
+				printf("Statement executed.\n");
+				break;
+			case (EXECUTE_TABLE_FULL):
+				printf("Table is full !");
+				break;
+		}		
 	}
 	return 0;
 }
